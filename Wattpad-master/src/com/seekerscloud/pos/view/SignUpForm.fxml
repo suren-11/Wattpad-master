@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="signupFormContext" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seekerscloud.pos.controller.SignUpFormController">
+   <children>
+      <AnchorPane layoutX="10.0" layoutY="10.0" prefHeight="561.0" prefWidth="514.0" style="-fx-background-color: #C4DBF5;">
+         <children>
+            <AnchorPane layoutX="57.0" layoutY="10.0" prefHeight="536.0" prefWidth="457.0" style="-fx-background-color: #F5F5F5;">
+               <children>
+                  <ImageView fitHeight="59.0" fitWidth="229.0" layoutX="16.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../asserts/logo.png" />
+                     </image>
+                  </ImageView>
+                  <Label layoutX="170.0" layoutY="77.0" text="Welcome Back">
+                     <font>
+                        <Font name="Gadugi" size="18.0" />
+                     </font>
+                  </Label>
+                  <JFXTextField fx:id="txtEmail" labelFloat="true" layoutX="96.0" layoutY="121.0" prefHeight="25.0" prefWidth="270.0" promptText="email">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </JFXTextField>
+                  <JFXPasswordField fx:id="txtRePassword" labelFloat="true" layoutX="94.0" layoutY="305.0" prefHeight="30.0" prefWidth="270.0" promptText="Re-Password">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </JFXPasswordField>
+                  <JFXButton buttonType="RAISED" layoutX="94.0" layoutY="359.0" onAction="#signUpOnAction" prefHeight="41.0" prefWidth="270.0" style="-fx-background-color: #0A6BED;" text="Sign up" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </JFXButton>
+                  <Separator layoutX="94.0" layoutY="416.0" prefHeight="3.0" prefWidth="117.0" />
+                  <Separator layoutX="247.0" layoutY="416.0" prefHeight="3.0" prefWidth="117.0" />
+                  <Label layoutX="221.0" layoutY="408.0" text="OR" />
+                  <JFXButton buttonType="RAISED" layoutX="94.0" layoutY="437.0" onAction="#alreadyHaveAnAccountOnAction" prefHeight="41.0" prefWidth="270.0" style="-fx-background-color: #34495E;" text="Already have an Account" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </JFXButton>
+                  <JFXTextField fx:id="txtFullName" labelFloat="true" layoutX="94.0" layoutY="166.0" prefHeight="25.0" prefWidth="270.0" promptText="Full Name">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </JFXTextField>
+                  <JFXTextField fx:id="txtContact" labelFloat="true" layoutX="94.0" layoutY="214.0" prefHeight="25.0" prefWidth="270.0" promptText="Contact">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </JFXTextField>
+                  <JFXPasswordField fx:id="txtPassword" labelFloat="true" layoutX="94.0" layoutY="262.0" prefHeight="30.0" prefWidth="270.0" promptText="Password">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </JFXPasswordField>
+               </children>
+            </AnchorPane>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="524.0" layoutY="10.0" prefHeight="561.0" prefWidth="514.0" style="-fx-background-color: #1D1E6B;">
+         <children>
+            <AnchorPane layoutY="80.0" prefHeight="401.0" prefWidth="457.0" style="-fx-background-color: DDE9F5;">
+               <children>
+                  <Label layoutX="282.0" layoutY="10.0" text="New Update is Available">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="66.0" layoutY="20.0" prefHeight="30.0" prefWidth="377.0" text="Lorem Ipsum is simply dummy text of the printing and typesetting" />
+               </children>
+            </AnchorPane>
+            <ImageView fitHeight="414.0" fitWidth="499.0" layoutX="-30.0" layoutY="124.0" pickOnBounds="true">
+               <image>
+                  <Image url="@../asserts/login-bg.png" />
+               </image>
+            </ImageView>
+            <JFXButton buttonType="RAISED" layoutX="325.0" layoutY="135.0" prefHeight="41.0" prefWidth="118.0" style="-fx-border-color: #0A6BED; -fx-border-width: 3; -fx-border-radius: 50;" text="Upgrade" textFill="#0a6bed">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </JFXButton>
+            <JFXPasswordField layoutX="8.0" layoutY="268.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

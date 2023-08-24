@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXDatePicker?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="context" prefHeight="587.0" prefWidth="789.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seekerscloud.pos.controller.StatisticsFormController">
+   <children>
+      <JFXButton buttonType="RAISED" layoutX="42.0" layoutY="34.0" onAction="#backToHomeOnAction" style="-fx-background-color: #27ae60;" text="Back to home" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </JFXButton>
+      <Label layoutX="163.0" layoutY="38.0" text="Statistics" textFill="#7c0000">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <Separator layoutX="258.0" layoutY="47.0" prefHeight="3.0" prefWidth="501.0" />
+      <JFXDatePicker defaultColor="#070497" layoutX="42.0" layoutY="76.0" promptText="From" />
+      <JFXDatePicker defaultColor="#070497" layoutX="222.0" layoutY="76.0" promptText="To" />
+      <LineChart fx:id="chart" layoutX="42.0" layoutY="139.0" prefHeight="400.0" prefWidth="717.0" title="Income Status">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+   </children>
+</AnchorPane>

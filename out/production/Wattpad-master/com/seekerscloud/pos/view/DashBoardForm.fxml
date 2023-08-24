@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.effect.Shadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="dashboardContext" prefHeight="542.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seekerscloud.pos.controller.DashBoardFormController">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" text="EasyPOS">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <Separator layoutX="107.0" layoutY="28.0" prefHeight="2.0" prefWidth="238.0" />
+      <JFXButton buttonType="RAISED" layoutX="824.0" layoutY="14.0" onAction="#logoutOnAction" style="-fx-background-color: #16a085;" text="Logout" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXButton>
+      <Label fx:id="lblDate" layoutX="352.0" layoutY="15.0" prefHeight="27.0" prefWidth="108.0" textFill="#03009a">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblTime" layoutX="465.0" layoutY="14.0" prefHeight="27.0" prefWidth="88.0" textFill="#03009a">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Separator layoutX="460.0" layoutY="14.0" orientation="VERTICAL" prefHeight="27.0" prefWidth="0.0" />
+      <Separator layoutX="558.0" layoutY="26.0" prefHeight="3.0" prefWidth="247.0" />
+      <AnchorPane layoutX="26.0" layoutY="89.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-radius: 100%; -fx-background-radius: 100;">
+         <effect>
+            <Shadow color="#2c3e50" height="38.98" radius="15.9175" width="26.69" />
+         </effect>
+      </AnchorPane>
+      <AnchorPane layoutX="26.0" layoutY="89.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ecf0f1; -fx-background-radius: 100; -fx-border-radius: 100;">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </AnchorPane>
+      <AnchorPane layoutX="675.0" layoutY="89.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-radius: 100%; -fx-background-radius: 100;">
+         <effect>
+            <Shadow color="#2c3e50" height="38.98" radius="15.9175" width="26.69" />
+         </effect>
+      </AnchorPane>
+      <AnchorPane layoutX="675.0" layoutY="89.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ecf0f1; -fx-background-radius: 100; -fx-border-radius: 100;">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </AnchorPane>
+      <AnchorPane layoutX="350.0" layoutY="89.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-radius: 100%; -fx-background-radius: 100;">
+         <effect>
+            <Shadow color="#2c3e50" height="38.98" radius="15.9175" width="26.69" />
+         </effect>
+      </AnchorPane>
+      <AnchorPane layoutX="350.0" layoutY="89.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ecf0f1; -fx-background-radius: 100; -fx-border-radius: 100;">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </AnchorPane>
+      <AnchorPane layoutX="527.0" layoutY="304.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-radius: 100%; -fx-background-radius: 100;">
+         <effect>
+            <Shadow color="#2c3e50" height="38.98" radius="15.9175" width="26.69" />
+         </effect>
+      </AnchorPane>
+      <AnchorPane layoutX="527.0" layoutY="304.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ecf0f1; -fx-background-radius: 100; -fx-border-radius: 100;">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </AnchorPane>
+      <AnchorPane layoutX="180.0" layoutY="304.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-radius: 100%; -fx-background-radius: 100;">
+         <effect>
+            <Shadow color="#2c3e50" height="38.98" radius="15.9175" width="26.69" />
+         </effect>
+      </AnchorPane>
+      <AnchorPane layoutX="180.0" layoutY="304.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #ecf0f1; -fx-background-radius: 100; -fx-border-radius: 100;">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </AnchorPane>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="48.0" layoutY="115.0" onMouseClicked="#openCustomerFormOnAction" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../asserts/dashboard/customer.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="207.0" layoutY="329.0" onMouseClicked="#openOrderDetailsOnAction" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../asserts/dashboard/order-details.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="372.0" layoutY="110.0" onMouseClicked="#openPlaceOrderFormOnAction" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../asserts/dashboard/place-order.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="681.0" layoutY="110.0" onMouseClicked="#openProductManagementOnAction" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../asserts/dashboard/products.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="545.0" layoutY="326.0" onMouseClicked="#openStatisticsOnAction" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../asserts/dashboard/statistics.png" />
+         </image>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </ImageView>
+      <Label layoutX="60.0" layoutY="304.0" text="Customer Management" textFill="#0f00b2" />
+      <Label layoutX="421.0" layoutY="296.0" text="Pace Order" textFill="#0f00b2" />
+      <Label layoutX="717.0" layoutY="296.0" text="Product Management" textFill="#0f00b2" />
+      <Label layoutX="604.0" layoutY="511.0" text="Statistics" textFill="#0f00b2" />
+      <Label layoutX="245.0" layoutY="511.0" text="Order Details" textFill="#0f00b2" />
+   </children>
+</AnchorPane>

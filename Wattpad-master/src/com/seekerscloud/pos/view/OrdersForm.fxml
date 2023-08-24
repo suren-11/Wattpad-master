@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXDatePicker?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="ordersContext" prefHeight="406.0" prefWidth="777.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seekerscloud.pos.controller.OrdersFormController">
+   <children>
+      <JFXButton buttonType="RAISED" layoutX="32.0" layoutY="24.0" onAction="#backToHomeOnAction" style="-fx-background-color: #27ae60;" text="Back to home" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </JFXButton>
+      <Label layoutX="153.0" layoutY="28.0" text="Orders" textFill="#7c0000">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <Separator layoutX="248.0" layoutY="37.0" prefHeight="3.0" prefWidth="501.0" />
+      <JFXDatePicker defaultColor="#070497" layoutX="32.0" layoutY="66.0" promptText="From" />
+      <JFXDatePicker defaultColor="#070497" layoutX="212.0" layoutY="66.0" promptText="To" />
+      <Separator layoutX="32.0" layoutY="116.0" prefHeight="3.0" prefWidth="716.0" />
+      <TableView fx:id="tblOrders" layoutX="34.0" layoutY="134.0" prefHeight="258.0" prefWidth="716.0">
+        <columns>
+          <TableColumn fx:id="colOrderId" prefWidth="75.0" text="Order Id" />
+          <TableColumn fx:id="colOrderDate" prefWidth="102.0" text="Date" />
+            <TableColumn fx:id="colTotal" prefWidth="178.0" text="Total" />
+            <TableColumn fx:id="colCustomerId" prefWidth="153.0" text="Customer Id" />
+            <TableColumn fx:id="colOption" prefWidth="206.0" text="Option" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

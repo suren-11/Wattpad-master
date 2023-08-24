@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="context" prefHeight="438.0" prefWidth="653.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seekerscloud.pos.controller.OrderDetailsFormController">
+   <children>
+      <Label layoutX="21.0" layoutY="14.0" text="Order Details" textFill="#7c0000">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <Separator layoutX="116.0" layoutY="23.0" prefHeight="3.0" prefWidth="501.0" />
+      <JFXTextField fx:id="txtId" disable="true" labelFloat="true" layoutX="21.0" layoutY="65.0" promptText="Customer Id">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <JFXTextField fx:id="txtName" disable="true" labelFloat="true" layoutX="21.0" layoutY="111.0" promptText="Customer Name">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <JFXTextField fx:id="txtAddress" disable="true" labelFloat="true" layoutX="21.0" layoutY="157.0" promptText="Customer Address">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <JFXTextField fx:id="txtSalary" disable="true" labelFloat="true" layoutX="21.0" layoutY="201.0" promptText="Salary">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <JFXTextField fx:id="txtOrderId" disable="true" labelFloat="true" layoutX="241.0" layoutY="65.0" promptText="Order Id">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <JFXTextField fx:id="txtCost" disable="true" labelFloat="true" layoutX="241.0" layoutY="111.0" promptText="Total Cost">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <JFXTextField fx:id="txtDate" disable="true" labelFloat="true" layoutX="241.0" layoutY="157.0" promptText="Date">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </JFXTextField>
+      <TableView fx:id="tblItemDetails" disable="true" layoutX="21.0" layoutY="265.0" prefHeight="162.0" prefWidth="612.0">
+        <columns>
+          <TableColumn fx:id="colProductCode" prefWidth="103.0" text="Product Code" />
+          <TableColumn fx:id="colUnitPrice" prefWidth="150.0" text="Unit Price" />
+            <TableColumn fx:id="colQty" prefWidth="153.0" text="QTY" />
+            <TableColumn fx:id="colTotal" prefWidth="204.0" text="Total Cost" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>
