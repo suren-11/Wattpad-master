@@ -15,6 +15,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -88,7 +89,7 @@ public class CustomerFormController {
 
     public void saveUpdateOnAction(ActionEvent actionEvent) {
 
-        Customer customer = new Customer(
+                Customer customer = new Customer(
                 txtId.getText(),
                 txtName.getText(),
                 txtAddress.getText(),
@@ -97,25 +98,49 @@ public class CustomerFormController {
 
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Customer")){
             //save
-            if (Database.customerTable.add(customer)){
-                new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
-                setTableData(searchText);
-                setCustomerId();
-                clear();
-            }else{
-                new Alert(Alert.AlertType.CONFIRMATION, "Try Again").show();
+            try{
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
+                String sql ="INSERT INTO Customer VALUES (?,?,?,?)";
+                PreparedStatement statement = connection.prepareStatement(sql);
+                statement.setString(1, customer.getId());
+                statement.setString(2, customer.getName());
+                statement.setString(3, customer.getAddress());
+                statement.setDouble(4, customer.getSalary());
+                if (statement.executeUpdate()>0){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
+                    setTableData(searchText);
+                    setCustomerId();
+                    clear();
+                }else{
+                    new Alert(Alert.AlertType.CONFIRMATION, "Try Again").show();
+                }
+            }catch (ClassNotFoundException | SQLException e){
+                e.printStackTrace();
             }
+
         }else{
-            for(Customer c :Database.customerTable){
-                if (txtId.getText().equalsIgnoreCase(c.getId())){
-                    c.setName(txtName.getText());
-                    c.setAddress(txtAddress.getText());
-                    c.setSalary(Double.parseDouble(txtSalary.getText()));
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
+                String sql = "UPDATE Customer SET name  = ?, address = ?, salary = ? WHERE id = ?";
+                PreparedStatement statement = connection.prepareStatement(sql);
+                statement.setString(1, customer.getName());
+                statement.setString(2, customer.getAddress());
+                statement.setDouble(3, customer.getSalary());
+                statement.setString(4, customer.getId());
+
+                if (statement.executeUpdate()>0){
                     new Alert(Alert.AlertType.CONFIRMATION, "Customer Updated!").show();
                     setTableData(searchText);
                     clear();
+                }else {
+                    new Alert(Alert.AlertType.WARNING, "Try Again").show();
                 }
+            }catch (ClassNotFoundException | SQLException e){
+                e.printStackTrace();
             }
+
         }
 
     }
@@ -130,14 +155,20 @@ public class CustomerFormController {
     }
 
     private void setTableData(String text){
-        text = text.toLowerCase(); // String Pool==> Strings are immutable
-        ArrayList<Customer> customerList=Database.customerTable;
-        ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
-        for (Customer c:customerList
-             ) {
-            if (c.getName().toLowerCase().contains(text) || c.getAddress().toLowerCase().contains(text)){
+        text = "%"+text.toLowerCase()+"%"; // String Pool==> Strings are immutable
+        try {
+            ArrayList<Customer> customerList=Database.customerTable;
+            ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
+            String sql="SELECT * FROM Customer WHERE name LIKE ? || address LIKE ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1,text);
+            statement.setString(2,text);
+            ResultSet set = statement.executeQuery();
+            while (set.next()){
                 Button btn= new Button("Delete");
-                CustomerTM tm = new CustomerTM(c.getId(),c.getName(),c.getAddress(),c.getSalary(),btn);
+                CustomerTM tm = new CustomerTM(set.getString(1),set.getString(2),set.getString(3),set.getDouble(4),btn);
                 obList.add(tm);
 
                 btn.setOnAction(e->{
@@ -145,17 +176,34 @@ public class CustomerFormController {
                             "Are you sure?", ButtonType.YES, ButtonType.NO);
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
-                        Database.customerTable.remove(c);
-                        new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
-                        setTableData(searchText);
+                        try {
+                            Class.forName("com.mysql.cj.jdbc.Driver");
+                            Connection connection1 = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
+                            String sql1="DELETE FROM Customer WHERE id = ?";
+                            PreparedStatement statement1 = connection1.prepareStatement(sql1);
+                            statement1.setString(1, tm.getId());
+                            if (statement1.executeUpdate()>0){
+                                new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
+                                setTableData(searchText);
+                            }else {
+                                new Alert(Alert.AlertType.WARNING, "Try Again").show();
+                            }
+
+                        }catch (ClassNotFoundException | SQLException s){
+                            s.printStackTrace();
+                        }
+
                     }
 
                 });
             }
-
-
+            tblCustomer.setItems(obList);
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
-        tblCustomer.setItems(obList);
+
+
+
     }
 
     private void setCustomerId(){
@@ -165,24 +213,34 @@ public class CustomerFormController {
         // increment the separated number
         // concat the character again to the incremented number (C-002)
         // set CustomerId
-        if (!Database.customerTable.isEmpty()){
-            Customer c= Database.customerTable.get(Database.customerTable.size()-1); //[10,20] size=2 => last => size-1 = 1 [10,20]
-            String id = c.getId(); // C-002
-            String dataArray[] = id.split("-");// => ["C","002"]; // java string class=> split
-            id=dataArray[1]; // 002
-            int oldNumber= Integer.parseInt(id); // 2 => 00 remove
-            oldNumber++; // 3
-            if (oldNumber<9){
-                txtId.setText("C-00"+oldNumber);
-            }else if(oldNumber<99){
-                txtId.setText("C-0"+oldNumber);
-            }else{
-                txtId.setText("C-"+oldNumber);
-            }
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
+            String sql="SELECT * FROM Customer ORDER BY id DESC";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet set = statement.executeQuery();
 
-        }else{
-            txtId.setText("C-001");
+            if (set.next()){
+//                txtId.setText("C-001");
+                String id = set.getString(1);
+                String[] dataArray = id.split("-");// => ["C","002"]; // java string class=> split
+                String ids=dataArray[1]; // 002
+                int oldNumber= Integer.parseInt(ids); // 2 => 00 remove
+                oldNumber++; // 3
+                if (oldNumber<9){
+                    txtId.setText("C-00"+oldNumber);
+                }else if(oldNumber<99){
+                    txtId.setText("C-0"+oldNumber);
+                }else{
+                    txtId.setText("C-"+oldNumber);
+                }
+            }else {
+                txtId.setText("C-001");
+            }
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
+
     }
 
     public void newCustomerOnAction(ActionEvent actionEvent) {
