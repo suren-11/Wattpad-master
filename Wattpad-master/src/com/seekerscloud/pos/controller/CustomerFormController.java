@@ -1,6 +1,7 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
 import com.seekerscloud.pos.model.Customer;
 import com.seekerscloud.pos.view.tm.CustomerTM;
@@ -99,10 +100,8 @@ public class CustomerFormController {
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Customer")){
             //save
             try{
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
                 String sql ="INSERT INTO Customer VALUES (?,?,?,?)";
-                PreparedStatement statement = connection.prepareStatement(sql);
+                PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
                 statement.setString(1, customer.getId());
                 statement.setString(2, customer.getName());
                 statement.setString(3, customer.getAddress());
@@ -121,10 +120,8 @@ public class CustomerFormController {
 
         }else{
             try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
                 String sql = "UPDATE Customer SET name  = ?, address = ?, salary = ? WHERE id = ?";
-                PreparedStatement statement = connection.prepareStatement(sql);
+                PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
                 statement.setString(1, customer.getName());
                 statement.setString(2, customer.getAddress());
                 statement.setDouble(3, customer.getSalary());
@@ -157,12 +154,10 @@ public class CustomerFormController {
     private void setTableData(String text){
         text = "%"+text.toLowerCase()+"%"; // String Pool==> Strings are immutable
         try {
-            ArrayList<Customer> customerList=Database.customerTable;
+
             ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
             String sql="SELECT * FROM Customer WHERE name LIKE ? || address LIKE ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
             statement.setString(1,text);
             statement.setString(2,text);
             ResultSet set = statement.executeQuery();
@@ -177,13 +172,12 @@ public class CustomerFormController {
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
                         try {
-                            Class.forName("com.mysql.cj.jdbc.Driver");
-                            Connection connection1 = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
                             String sql1="DELETE FROM Customer WHERE id = ?";
-                            PreparedStatement statement1 = connection1.prepareStatement(sql1);
+                            PreparedStatement statement1 = DBConnection.getInstance().getConnection().prepareStatement(sql1);
                             statement1.setString(1, tm.getId());
                             if (statement1.executeUpdate()>0){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
+                                setCustomerId();
                                 setTableData(searchText);
                             }else {
                                 new Alert(Alert.AlertType.WARNING, "Try Again").show();
@@ -202,8 +196,6 @@ public class CustomerFormController {
             e.printStackTrace();
         }
 
-
-
     }
 
     private void setCustomerId(){
@@ -214,10 +206,8 @@ public class CustomerFormController {
         // concat the character again to the incremented number (C-002)
         // set CustomerId
         try{
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Wattpad","root","1992");
             String sql="SELECT * FROM Customer ORDER BY id DESC";
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
             ResultSet set = statement.executeQuery();
 
             if (set.next()){

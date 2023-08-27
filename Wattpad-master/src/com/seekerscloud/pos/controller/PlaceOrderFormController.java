@@ -1,6 +1,7 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
 import com.seekerscloud.pos.model.CartItem;
 import com.seekerscloud.pos.model.Customer;
@@ -18,6 +19,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,45 +87,69 @@ public class PlaceOrderFormController {
     }
 
     private void setProductData(String code) {
-        txtQty.requestFocus();
-        Product product = Database.productTable.stream().filter(e -> e.getCode().equals(code))
-                .findFirst().orElse(null);
-        if (product != null) {
-            txtDescription.setText(product.getDescription());
-            txtUnitPrice.setText(String.valueOf(product.getUnitPrice()));
-            txtQtyOnHand.setText(String.valueOf(product.getQtyOnHand()));
+        try {
+            txtQty.requestFocus();
+            String sql = "SELECT * FROM Product WHERE code = ?";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            statement.setString(1,code);
+            ResultSet set = statement.executeQuery();
+            if (set.next()){
+                txtDescription.setText(set.getString(2));
+                txtUnitPrice.setText(String.valueOf(set.getDouble(3)));
+                txtQtyOnHand.setText(String.valueOf(set.getInt(4)));
+            }
+        }catch (ClassNotFoundException | SQLException s){
+            s.printStackTrace();
         }
     }
 
     private void setCustomerData(String id) {
-        Stream<Customer> customerList =
-                Database.customerTable.stream().filter(e -> e.getId().equals(id));
-        Optional<Customer> first = customerList.findFirst();
-        if (first.isPresent()) {
-            Customer customer = first.get();
-            txtName.setText(customer.getName());
-            txtAddress.setText(customer.getAddress());
-            txtSalary.setText(String.valueOf(customer.getSalary()));
+        try {
+            txtQty.requestFocus();
+            String sql = "SELECT * FROM Customer WHERE id = ?";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            statement.setString(1,id);
+            ResultSet set = statement.executeQuery();
+            if (set.next()){
+                txtName.setText(set.getString(2));
+                txtAddress.setText(set.getString(3));
+                txtSalary.setText(String.valueOf(set.getDouble(4)));
+            }
+        }catch (ClassNotFoundException | SQLException s){
+            s.printStackTrace();
         }
-
     }
 
     private void loadCustomerIds() {
-        ObservableList<String> obList = FXCollections.observableArrayList();
-        for (Customer c : Database.customerTable
-        ) {
-            obList.add(c.getId());
+        try {
+            String sql = "SELECT id FROM Customer";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet set = statement.executeQuery();
+            ArrayList<String> idList = new ArrayList<>();
+            while (set.next()) {
+                idList.add(set.getString(1));
+            }
+            ObservableList<String> obList = FXCollections.observableArrayList(idList);
+            cmbCustomerCodes.setItems(obList);
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
-        cmbCustomerCodes.setItems(obList);
     }
 
     private void loadItemCodes() {
-        ObservableList<String> obList = FXCollections.observableArrayList();
-        for (Product p : Database.productTable
-        ) {
-            obList.add(p.getCode());
+        try {
+            String sql = "SELECT code FROM Product";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet set = statement.executeQuery();
+            ArrayList<String> codeList = new ArrayList<>();
+            while (set.next()){
+                codeList.add(set.getString(1));
+            }
+            ObservableList<String> obList = FXCollections.observableArrayList(codeList);
+            cmbItemCodes.setItems(obList);
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
-        cmbItemCodes.setItems(obList);
     }
 
     public void backToHomeOnAction(ActionEvent actionEvent) throws IOException {
@@ -238,14 +267,37 @@ public class PlaceOrderFormController {
         Order order = new Order(txtOrderId.getText(),new Date(),
                 Double.parseDouble(txtOrderTotal.getText()),
                 cmbCustomerCodes.getValue(),items);
-        Database.orderTable.add(order);
-        if (manageQty(items)){
-            new Alert(Alert.AlertType.INFORMATION,
-                    "Order Placed!").show();
-            generateOrderId();
-            setFreshUI();
-        }else{
-            // error
+        Connection conn = null;
+        try {
+            conn = DBConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+            String sql = "INSERT INTO `Order` VALUES (?,?,?,?)";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, order.getOrderId());
+            statement.setString(2, String.valueOf(new Date()));
+            statement.setDouble(3,order.getTotal());
+            statement.setString(4, order.getCustomer());
+
+            if (statement.executeUpdate()>0){
+                boolean allQtyUpdated = manageQty(items);
+                if (allQtyUpdated) {
+                    conn.commit();
+                    new Alert(Alert.AlertType.INFORMATION,
+                            "Order Placed!").show();
+                    generateOrderId();
+                    setFreshUI();
+                } else {
+                    conn.setAutoCommit(true);
+                    conn.rollback();
+                    new Alert(Alert.AlertType.WARNING,"Try Again");
+                }
+            }else {
+                conn.setAutoCommit(true);
+                conn.rollback();
+                new Alert(Alert.AlertType.WARNING,"Try Again").show();
+            }
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
     }
 
@@ -263,39 +315,72 @@ public class PlaceOrderFormController {
     }
 
     private void generateOrderId() {
-        if (!Database.orderTable.isEmpty()){
-            Order o= Database.orderTable.get(Database.orderTable.size()-1);
-            String id = o.getOrderId();
-            //String dataArray[] = id.split("a-z"); // a001 b001
-            String dataArray[] = id.split("[a-zA-Z]"); // A001 b001
-            id=dataArray[1];
-            int oldNumber= Integer.parseInt(id);
-            oldNumber++;
-            if (oldNumber<9){
-                txtOrderId.setText("B00"+oldNumber);
-            }else if(oldNumber<99){
-                txtOrderId.setText("B0"+oldNumber);
-            }else{
-                txtOrderId.setText("B"+oldNumber);
+        try {
+            String sql = "SELECT orderId FROM `Order` ORDER BY orderId DESC LIMIT 1";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            ResultSet set = statement.executeQuery();
+            if (set.next()){
+                String id = set.getString(1);
+                //String dataArray[] = id.split("a-z"); // a001 b001
+                String dataArray[] = id.split("[a-zA-Z]"); // A001 b001
+                id=dataArray[1];
+                int oldNumber= Integer.parseInt(id);
+                oldNumber++;
+                if (oldNumber<9){
+                    txtOrderId.setText("B00"+oldNumber);
+                }else if(oldNumber<99){
+                    txtOrderId.setText("B0"+oldNumber);
+                }else{
+                    txtOrderId.setText("B"+oldNumber);
+                }
+            }else {
+                txtOrderId.setText("B001");
             }
 
-        }else{
-            txtOrderId.setText("B001");
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
     }
 
     private boolean manageQty(ArrayList<CartItem> items){
-        for (CartItem i:items
-             ) {
-            Product p =Database.productTable.stream()
-                    .filter(e->e.getCode().equals(i.getCode())).findFirst().orElse(null);
-            if (p!=null){
-                p.setQtyOnHand((p.getQtyOnHand()-i.getQty()));
-            }else{
-                return false;
+
+            try {
+                for (CartItem i:items
+                ) {
+                    String sql = "INSERT INTO `Order Details` VALUES (?,?,?,?)";
+                    PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+                    statement.setString(1, i.getCode());
+                    statement.setString(2, txtOrderId.getText());
+                    statement.setDouble(3, i.getUnitPrice());
+                    statement.setInt(4, i.getQty());
+
+                    boolean orderDetailsSaved = statement.executeUpdate() > 0;
+                    if (orderDetailsSaved) {
+                        boolean qtyUpdated = qtyUpdate(i);
+                        if (!qtyUpdated) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }catch (ClassNotFoundException | SQLException e){
+                e.printStackTrace();
             }
-        }
         return true;
+    }
+
+    private boolean qtyUpdate(CartItem i){
+        try {
+            String sql = "UPDATE Product SET qtyOnHand = (qtyOnHand - ?) WHERE code = ?";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            statement.setInt(1,i.getQty());
+            statement.setString(2,i.getCode());
+            return statement.executeUpdate()>0;
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public void placeOrderOnAction(ActionEvent actionEvent) {
