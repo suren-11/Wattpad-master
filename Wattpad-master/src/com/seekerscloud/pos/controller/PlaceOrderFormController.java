@@ -274,7 +274,7 @@ public class PlaceOrderFormController {
             String sql = "INSERT INTO `Order` VALUES (?,?,?,?)";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, order.getOrderId());
-            statement.setString(2, String.valueOf(new Date()));
+            statement.setString(2,new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
             statement.setDouble(3,order.getTotal());
             statement.setString(4, order.getCustomer());
 

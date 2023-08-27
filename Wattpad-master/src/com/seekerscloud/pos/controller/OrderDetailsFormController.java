@@ -51,7 +51,6 @@ public class OrderDetailsFormController {
                 return;
             }
 
-
             String sql1 = "SELECT customer,date FROM `order` WHERE  orderId = ?";
             PreparedStatement statement1 = DBConnection.getInstance().getConnection().prepareStatement(sql1);
             statement1.setString(1,orderId);
@@ -97,40 +96,7 @@ public class OrderDetailsFormController {
                         tblItemDetails.setItems(tmList);
                     }
                 }
-            /*Order o = Database.orderTable.stream().filter(e -> e.getOrderId().equals(orderId))
-                    .findFirst().orElse(null);
 
-            if (o != null) {
-
-                Customer c = Database.customerTable.stream().filter(e -> e.getId().equals(o.getCustomer()))
-                        .findFirst().orElse(null);
-                if (c != null) {
-                    //===============
-                    txtId.setText(c.getId());
-                    txtName.setText(c.getName());
-                    txtAddress.setText(c.getAddress());
-                    txtSalary.setText(String.valueOf(c.getSalary()));
-                    //===============
-                    txtOrderId.setText(o.getOrderId());
-                    txtDate.setText(new SimpleDateFormat("yyyy-MM-dd").format(o.getPlacedDate()));
-                    txtCost.setText(String.valueOf(o.getTotal()));
-                    //===============
-
-                    for (CartItem item : o.getItems()
-                    ) {
-                        tmList.add(new ItemDetailsTM(item.getCode(),
-                                item.getUnitPrice(), item.getQty(), (item.getQty()) * item.getUnitPrice()));
-                    }
-                    tblItemDetails.setItems(tmList);
-                    //===============
-
-                } else {
-                    removeUi();
-                }
-
-            } else {
-                removeUi();
-            }*/
             }
         }catch (ClassNotFoundException | SQLException e){
             e.printStackTrace();
