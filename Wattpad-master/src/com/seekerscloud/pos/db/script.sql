@@ -37,3 +37,10 @@ CREATE TABLE IF NOT EXISTS `Order Details`(
     CONSTRAINT FOREIGN KEY (itemCode) REFERENCES Product(code) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT  FOREIGN KEY (orderId) REFERENCES `Order`(orderId) ON DELETE CASCADE ON UPDATE CASCADE
     );
+#================================================
+CREATE TABLE IF NOT EXISTS `User`(
+    email VARCHAR(250),
+    fullName VARCHAR(45),
+    contact NUMBER,
+    password VARCHAR (45)
+    );

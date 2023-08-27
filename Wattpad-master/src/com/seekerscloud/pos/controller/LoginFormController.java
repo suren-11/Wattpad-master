@@ -2,6 +2,7 @@ package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
+import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
 import com.seekerscloud.pos.model.User;
 import javafx.event.ActionEvent;
@@ -13,6 +14,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class LoginFormController {
     public AnchorPane loginFormContext;
@@ -33,25 +37,32 @@ public class LoginFormController {
 
     public void loginOnAction(ActionEvent actionEvent) throws IOException {
         // get user details from the interface
-        String username = txtUserName.getText().trim();
-        String password = txtPassword.getText().trim();
-        // find the user with inserted email => user table
-        for (User u : Database.userTable) {
-            System.out.println(u.getEmail());
-            if (u.getEmail().equals(username)) {
-                // check passwords
-                // if correct => redirect to the dashboard otherwise the system must show an error.
-                if (u.getPassword().equals(password)){ /* we must encrypt them*/
-                    setUi("DashBoardForm", u.getEmail());
-                }else{
-                    new Alert(Alert.AlertType.WARNING,
-                            "Password is Incorrect!").show();
-                }
-                return;
+        try {
+            String sql = "SELECT email,password FROM `User` WHERE email = ?";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            statement.setString(1,txtUserName.getText());
+            ResultSet set = statement.executeQuery();
+            String username = txtUserName.getText().trim();
+            String password = txtPassword.getText().trim();
+            while (set.next()){
+                String realUserName = set.getString(1);
+                String realPassword = set.getString(2);
+                if (username.equals(realUserName)) { /* we must encrypt them*/
+                    if (password.equals(realPassword)){
+                        setUi("DashBoardForm", set.getString(1));
+                    }else {
+                        new Alert(Alert.AlertType.WARNING,
+                                "Password is Incorrect!").show();
+                    }
+                } return;
             }
+            // find the user with inserted email => user table
+
+            new Alert(Alert.AlertType.INFORMATION,
+                    "Can't find any user details with this username").show();
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
-        new Alert(Alert.AlertType.INFORMATION,
-                "Can't find any user details with this username").show();
 
     }
 }
