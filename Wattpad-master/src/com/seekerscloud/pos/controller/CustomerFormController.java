@@ -1,9 +1,10 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.custom.implement.CustomerDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
-import com.seekerscloud.pos.model.Customer;
+import com.seekerscloud.pos.entity.Customer;
 import com.seekerscloud.pos.view.tm.CustomerTM;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -89,24 +90,16 @@ public class CustomerFormController {
     }
 
     public void saveUpdateOnAction(ActionEvent actionEvent) {
-
-                Customer customer = new Customer(
-                txtId.getText(),
-                txtName.getText(),
-                txtAddress.getText(),
-                Double.parseDouble(txtSalary.getText())
-        );
-
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Customer")){
             //save
             try{
-                String sql ="INSERT INTO Customer VALUES (?,?,?,?)";
-                PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-                statement.setString(1, customer.getId());
-                statement.setString(2, customer.getName());
-                statement.setString(3, customer.getAddress());
-                statement.setDouble(4, customer.getSalary());
-                if (statement.executeUpdate()>0){
+                boolean isCustomerSaved = new CustomerDaoImpl().save(new Customer(
+                        txtId.getText(),
+                        txtName.getText(),
+                        txtAddress.getText(),
+                        Double.parseDouble(txtSalary.getText())
+                ));
+                if (isCustomerSaved){
                     new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
                     setTableData(searchText);
                     setCustomerId();
@@ -120,14 +113,13 @@ public class CustomerFormController {
 
         }else{
             try {
-                String sql = "UPDATE Customer SET name  = ?, address = ?, salary = ? WHERE id = ?";
-                PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-                statement.setString(1, customer.getName());
-                statement.setString(2, customer.getAddress());
-                statement.setDouble(3, customer.getSalary());
-                statement.setString(4, customer.getId());
-
-                if (statement.executeUpdate()>0){
+                boolean isCustomerUpdated = new CustomerDaoImpl().update(new Customer(
+                        txtId.getText(),
+                        txtName.getText(),
+                        txtAddress.getText(),
+                        Double.parseDouble(txtSalary.getText())
+                ));
+                if (isCustomerUpdated){
                     new Alert(Alert.AlertType.CONFIRMATION, "Customer Updated!").show();
                     setTableData(searchText);
                     clear();
@@ -156,14 +148,15 @@ public class CustomerFormController {
         try {
 
             ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
-            String sql="SELECT * FROM Customer WHERE name LIKE ? || address LIKE ?";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            statement.setString(1,text);
-            statement.setString(2,text);
-            ResultSet set = statement.executeQuery();
-            while (set.next()){
+            ArrayList<Customer> customers = new CustomerDaoImpl().setData(text);
+            for (Customer c : customers){
                 Button btn= new Button("Delete");
-                CustomerTM tm = new CustomerTM(set.getString(1),set.getString(2),set.getString(3),set.getDouble(4),btn);
+                CustomerTM tm = new CustomerTM(
+                        c.getId(),
+                        c.getName(),
+                        c.getAddress(),
+                        c.getSalary(),
+                        btn);
                 obList.add(tm);
 
                 btn.setOnAction(e->{
@@ -172,10 +165,7 @@ public class CustomerFormController {
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
                         try {
-                            String sql1="DELETE FROM Customer WHERE id = ?";
-                            PreparedStatement statement1 = DBConnection.getInstance().getConnection().prepareStatement(sql1);
-                            statement1.setString(1, tm.getId());
-                            if (statement1.executeUpdate()>0){
+                           if (new CustomerDaoImpl().delete(tm.getId())){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
                                 setCustomerId();
                                 setTableData(searchText);
@@ -206,9 +196,7 @@ public class CustomerFormController {
         // concat the character again to the incremented number (C-002)
         // set CustomerId
         try{
-            String sql="SELECT * FROM Customer ORDER BY id DESC";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = new CustomerDaoImpl().setId();
 
             if (set.next()){
 //                txtId.setText("C-001");
