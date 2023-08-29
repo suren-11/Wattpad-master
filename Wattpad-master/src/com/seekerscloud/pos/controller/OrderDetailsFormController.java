@@ -4,9 +4,9 @@ import com.jfoenix.controls.JFXTextField;
 import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
+import com.seekerscloud.pos.entity.Order;
 import com.seekerscloud.pos.model.CartItem;
 import com.seekerscloud.pos.model.Customer;
-import com.seekerscloud.pos.model.Order;
 import com.seekerscloud.pos.view.tm.ItemDetailsTM;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,7 +44,6 @@ public class OrderDetailsFormController {
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
     }
 
-
     public void loadData(String orderId){
         try {
             if (orderId == null) {
@@ -55,7 +54,6 @@ public class OrderDetailsFormController {
             if (set1.next()){
                 String customerId = set1.getString(1);
                 String date = set1.getString(2);
-
                 ResultSet set2 = new OrderDaoImpl().selectedCustomer(customerId);
                 if (set2.next()){
                     txtId.setText(customerId);
@@ -67,7 +65,6 @@ public class OrderDetailsFormController {
                     txtDate.setText(date);
 
                     ResultSet set4 = new OrderDaoImpl().selectedTotal(orderId);
-
                     if (set4.next()){
                         double totalCost = set4.getDouble(1);
                         ResultSet set = new OrderDaoImpl().detailLoad(orderId);
@@ -83,13 +80,10 @@ public class OrderDetailsFormController {
                         tblItemDetails.setItems(tmList);
                     }
                 }
-
             }
         }catch (ClassNotFoundException | SQLException e){
             e.printStackTrace();
         }
-
-
     }
 
     private void removeUi() {
@@ -97,5 +91,4 @@ public class OrderDetailsFormController {
         stage.close();
         new Alert(Alert.AlertType.ERROR, "Something went wrong!").show();
     }
-
 }

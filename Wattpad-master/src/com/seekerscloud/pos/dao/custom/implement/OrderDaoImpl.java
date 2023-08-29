@@ -38,7 +38,7 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public ResultSet loadOrderData(String s) throws SQLException, ClassNotFoundException {
-        return CrudUtil.execute("DELETE FROM `Order` WHERE orderId = ?",s);
+        return CrudUtil.execute("SELECT customer,date FROM `Order` WHERE orderId = ?",s);
     }
 
     @Override
