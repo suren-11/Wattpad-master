@@ -2,6 +2,7 @@ package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
+import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
 import com.seekerscloud.pos.model.User;
 import javafx.event.ActionEvent;
@@ -12,6 +13,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class SignUpFormController {
     public JFXTextField txtEmail;
@@ -45,12 +48,23 @@ public class SignUpFormController {
         txtEmail.clear();txtFullName.clear();txtContact.clear();txtPassword.clear();txtRePassword.clear();
     }
     private boolean saveUser(User u){
-        for (User tempUser: Database.userTable){
-            if (tempUser.getEmail().equals(u.getEmail())){
-                return false;
-            }
+        try {
+            String sql = "INSERT INTO `User` VALUES (?,?,?,?)";
+            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            statement.setString(1,u.getEmail());
+            statement.setString(2,u.getFullName());
+            statement.setString(3,u.getContact());
+            statement.setString(4,u.getPassword());
+
+            boolean userSaved = statement.executeUpdate()>0;
+                if (!userSaved) {
+                    return false;
+                }
+            return true;// inbuilt method ==> java.util
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
+            return false;
         }
-        return Database.userTable.add(u);// inbuilt method ==> java.util
     }
 
     private void setUi(String location,String title) throws IOException {

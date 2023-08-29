@@ -1,8 +1,10 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.custom.implement.CustomerDaoImpl;
+import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
-import com.seekerscloud.pos.model.Customer;
+import com.seekerscloud.pos.entity.Customer;
 import com.seekerscloud.pos.view.tm.CustomerTM;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,6 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -87,35 +90,46 @@ public class CustomerFormController {
     }
 
     public void saveUpdateOnAction(ActionEvent actionEvent) {
-
-        Customer customer = new Customer(
-                txtId.getText(),
-                txtName.getText(),
-                txtAddress.getText(),
-                Double.parseDouble(txtSalary.getText())
-        );
-
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Customer")){
             //save
-            if (Database.customerTable.add(customer)){
-                new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
-                setTableData(searchText);
-                setCustomerId();
-                clear();
-            }else{
-                new Alert(Alert.AlertType.CONFIRMATION, "Try Again").show();
+            try{
+                boolean isCustomerSaved = new CustomerDaoImpl().save(new Customer(
+                        txtId.getText(),
+                        txtName.getText(),
+                        txtAddress.getText(),
+                        Double.parseDouble(txtSalary.getText())
+                ));
+                if (isCustomerSaved){
+                    new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved!").show();
+                    setTableData(searchText);
+                    setCustomerId();
+                    clear();
+                }else{
+                    new Alert(Alert.AlertType.CONFIRMATION, "Try Again").show();
+                }
+            }catch (ClassNotFoundException | SQLException e){
+                e.printStackTrace();
             }
+
         }else{
-            for(Customer c :Database.customerTable){
-                if (txtId.getText().equalsIgnoreCase(c.getId())){
-                    c.setName(txtName.getText());
-                    c.setAddress(txtAddress.getText());
-                    c.setSalary(Double.parseDouble(txtSalary.getText()));
+            try {
+                boolean isCustomerUpdated = new CustomerDaoImpl().update(new Customer(
+                        txtId.getText(),
+                        txtName.getText(),
+                        txtAddress.getText(),
+                        Double.parseDouble(txtSalary.getText())
+                ));
+                if (isCustomerUpdated){
                     new Alert(Alert.AlertType.CONFIRMATION, "Customer Updated!").show();
                     setTableData(searchText);
                     clear();
+                }else {
+                    new Alert(Alert.AlertType.WARNING, "Try Again").show();
                 }
+            }catch (ClassNotFoundException | SQLException e){
+                e.printStackTrace();
             }
+
         }
 
     }
@@ -130,14 +144,19 @@ public class CustomerFormController {
     }
 
     private void setTableData(String text){
-        text = text.toLowerCase(); // String Pool==> Strings are immutable
-        ArrayList<Customer> customerList=Database.customerTable;
-        ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
-        for (Customer c:customerList
-             ) {
-            if (c.getName().toLowerCase().contains(text) || c.getAddress().toLowerCase().contains(text)){
+        text = "%"+text.toLowerCase()+"%"; // String Pool==> Strings are immutable
+        try {
+
+            ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
+            ArrayList<Customer> customers = new CustomerDaoImpl().setData(text);
+            for (Customer c : customers){
                 Button btn= new Button("Delete");
-                CustomerTM tm = new CustomerTM(c.getId(),c.getName(),c.getAddress(),c.getSalary(),btn);
+                CustomerTM tm = new CustomerTM(
+                        c.getId(),
+                        c.getName(),
+                        c.getAddress(),
+                        c.getSalary(),
+                        btn);
                 obList.add(tm);
 
                 btn.setOnAction(e->{
@@ -145,17 +164,28 @@ public class CustomerFormController {
                             "Are you sure?", ButtonType.YES, ButtonType.NO);
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
-                        Database.customerTable.remove(c);
-                        new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
-                        setTableData(searchText);
+                        try {
+                           if (new CustomerDaoImpl().delete(tm.getId())){
+                                new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
+                                setCustomerId();
+                                setTableData(searchText);
+                            }else {
+                                new Alert(Alert.AlertType.WARNING, "Try Again").show();
+                            }
+
+                        }catch (ClassNotFoundException | SQLException s){
+                            s.printStackTrace();
+                        }
+
                     }
 
                 });
             }
-
-
+            tblCustomer.setItems(obList);
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
-        tblCustomer.setItems(obList);
+
     }
 
     private void setCustomerId(){
@@ -165,24 +195,30 @@ public class CustomerFormController {
         // increment the separated number
         // concat the character again to the incremented number (C-002)
         // set CustomerId
-        if (!Database.customerTable.isEmpty()){
-            Customer c= Database.customerTable.get(Database.customerTable.size()-1); //[10,20] size=2 => last => size-1 = 1 [10,20]
-            String id = c.getId(); // C-002
-            String dataArray[] = id.split("-");// => ["C","002"]; // java string class=> split
-            id=dataArray[1]; // 002
-            int oldNumber= Integer.parseInt(id); // 2 => 00 remove
-            oldNumber++; // 3
-            if (oldNumber<9){
-                txtId.setText("C-00"+oldNumber);
-            }else if(oldNumber<99){
-                txtId.setText("C-0"+oldNumber);
-            }else{
-                txtId.setText("C-"+oldNumber);
-            }
+        try{
+            ResultSet set = new CustomerDaoImpl().setId();
 
-        }else{
-            txtId.setText("C-001");
+            if (set.next()){
+//                txtId.setText("C-001");
+                String id = set.getString(1);
+                String[] dataArray = id.split("-");// => ["C","002"]; // java string class=> split
+                String ids=dataArray[1]; // 002
+                int oldNumber= Integer.parseInt(ids); // 2 => 00 remove
+                oldNumber++; // 3
+                if (oldNumber<9){
+                    txtId.setText("C-00"+oldNumber);
+                }else if(oldNumber<99){
+                    txtId.setText("C-0"+oldNumber);
+                }else{
+                    txtId.setText("C-"+oldNumber);
+                }
+            }else {
+                txtId.setText("C-001");
+            }
+        }catch (ClassNotFoundException | SQLException e){
+            e.printStackTrace();
         }
+
     }
 
     public void newCustomerOnAction(ActionEvent actionEvent) {
