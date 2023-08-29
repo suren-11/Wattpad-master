@@ -1,11 +1,9 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.custom.implement.ProductDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
-import com.seekerscloud.pos.db.Database;
-import com.seekerscloud.pos.model.Customer;
-import com.seekerscloud.pos.model.Product;
-import com.seekerscloud.pos.view.tm.CustomerTM;
+import com.seekerscloud.pos.entity.Product;
 import com.seekerscloud.pos.view.tm.ProductTM;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -80,27 +78,19 @@ public class ProductFormController {
     private void setTableData(String text){
         text = "%"+text.toLowerCase()+"%"; // String Pool==> Strings are immutable
         try {
-
             ObservableList<ProductTM> obList= FXCollections.observableArrayList();
-            String sql="SELECT * FROM Product WHERE description LIKE ?";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            statement.setString(1,text);
-            ResultSet set = statement.executeQuery();
-            while (set.next()){
+            ArrayList<Product> productsList = new ProductDaoImpl().setData(text);
+            for (Product p : productsList){
                 Button btn= new Button("Delete");
-                ProductTM tm = new ProductTM(set.getString(1),set.getString(2),set.getDouble(3),set.getInt(4),btn);
+                ProductTM tm = new ProductTM(p.getCode(),p.getDescription(),p.getUnitPrice(),p.getQtyOnHand(),btn);
                 obList.add(tm);
-
                 btn.setOnAction(e->{
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                             "Are you sure?", ButtonType.YES, ButtonType.NO);
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
                         try {
-                            String sql1="DELETE FROM Product WHERE code = ?";
-                            PreparedStatement statement1 = DBConnection.getInstance().getConnection().prepareStatement(sql1);
-                            statement1.setString(1, tm.getCode());
-                            if (statement1.executeUpdate()>0){
+                            if (new ProductDaoImpl().delete(tm.getCode())){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Product Deleted!").show();
                                 setTableData(searchText);
                                 setItemCode();
@@ -142,10 +132,7 @@ public class ProductFormController {
 
     private void setItemCode(){
         try{
-            String sql="SELECT * FROM Product ORDER BY code DESC";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ResultSet set = statement.executeQuery();
-
+            ResultSet set = new ProductDaoImpl().setId();
             if (set.next()){
 //                txtCode.setText("I-001");
                 String code = set.getString(1);
@@ -175,17 +162,13 @@ public class ProductFormController {
                 Double.parseDouble(txtUnitPrice.getText()),
                 Integer.parseInt(txtQtyOnHand.getText())
         );
-
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Product")){
             //save
             try{
-                String sql ="INSERT INTO Product VALUES (?,?,?,?)";
-                PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-                statement.setString(1, product.getCode());
-                statement.setString(2, product.getDescription());
-                statement.setDouble(3, product.getUnitPrice());
-                statement.setInt(4, product.getQtyOnHand());
-                if (statement.executeUpdate()>0){
+                boolean isProductSaved = new ProductDaoImpl().save(new Product(
+                        txtCode.getText(),txtDescription.getText(),Double.parseDouble(txtUnitPrice.getText()),Integer.parseInt(txtQtyOnHand.getText())
+                ));
+                if (isProductSaved){
                     setItemCode();
                     new Alert(Alert.AlertType.CONFIRMATION, "Product Saved!").show();
                     setTableData(searchText);
@@ -198,14 +181,11 @@ public class ProductFormController {
             }
         }else{
             try {
-                String sql = "UPDATE Product SET description  = ?, unitPrice = ?, qtyOnHand = ? WHERE code = ?";
-                PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-                statement.setString(1, product.getDescription());
-                statement.setDouble(2, product.getUnitPrice());
-                statement.setInt(3, product.getQtyOnHand());
-                statement.setString(4, product.getCode());
-
-                if (statement.executeUpdate()>0){
+                boolean isProductUpdated = new ProductDaoImpl().update(new Product(
+                        txtCode.getText(),txtDescription.getText(),Double.parseDouble(txtUnitPrice.getText()),
+                        Integer.parseInt(txtQtyOnHand.getText())
+                ));
+                if (isProductUpdated){
                     new Alert(Alert.AlertType.CONFIRMATION, "Product Updated!").show();
                     setTableData(searchText);
                     clear();
