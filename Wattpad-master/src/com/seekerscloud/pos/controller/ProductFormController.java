@@ -156,12 +156,6 @@ public class ProductFormController {
     }
 
     public void saveUpdateOnAction(ActionEvent actionEvent) {
-        Product product = new Product(
-                txtCode.getText(),
-                txtDescription.getText(),
-                Double.parseDouble(txtUnitPrice.getText()),
-                Integer.parseInt(txtQtyOnHand.getText())
-        );
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Product")){
             //save
             try{

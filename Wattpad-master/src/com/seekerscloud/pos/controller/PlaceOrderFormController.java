@@ -1,11 +1,15 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.custom.implement.CartItemImpl;
+import com.seekerscloud.pos.dao.custom.implement.CustomerDaoImpl;
+import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
+import com.seekerscloud.pos.dao.custom.implement.ProductDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
-import com.seekerscloud.pos.model.CartItem;
+import com.seekerscloud.pos.entity.CartItem;
 import com.seekerscloud.pos.model.Customer;
-import com.seekerscloud.pos.model.Order;
+import com.seekerscloud.pos.entity.Order;
 import com.seekerscloud.pos.model.Product;
 import com.seekerscloud.pos.view.tm.CartTM;
 import javafx.collections.FXCollections;
@@ -122,9 +126,7 @@ public class PlaceOrderFormController {
 
     private void loadCustomerIds() {
         try {
-            String sql = "SELECT id FROM Customer";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = new CustomerDaoImpl().loadID();
             ArrayList<String> idList = new ArrayList<>();
             while (set.next()) {
                 idList.add(set.getString(1));
@@ -138,9 +140,7 @@ public class PlaceOrderFormController {
 
     private void loadItemCodes() {
         try {
-            String sql = "SELECT code FROM Product";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = new ProductDaoImpl().loadCodes();
             ArrayList<String> codeList = new ArrayList<>();
             while (set.next()){
                 codeList.add(set.getString(1));
@@ -262,23 +262,16 @@ public class PlaceOrderFormController {
         ArrayList<CartItem> items= new ArrayList<>();
         for (CartTM tm:tmList
              ) {
-            items.add(new CartItem(tm.getCode(),tm.getQty(),tm.getUnitPrice()));
+            items.add(new CartItem(tm.getCode(), tm.getQty(), tm.getUnitPrice()));
         }
-        Order order = new Order(txtOrderId.getText(),new Date(),
-                Double.parseDouble(txtOrderTotal.getText()),
-                cmbCustomerCodes.getValue(),items);
         Connection conn = null;
         try {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
-            String sql = "INSERT INTO `Order` VALUES (?,?,?,?)";
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, order.getOrderId());
-            statement.setString(2,new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
-            statement.setDouble(3,order.getTotal());
-            statement.setString(4, order.getCustomer());
-
-            if (statement.executeUpdate()>0){
+            boolean isOrderSaved = new OrderDaoImpl().save(new Order(txtOrderId.getText(),new SimpleDateFormat("dd-MM-yyyy").format(new Date()),
+                    Double.parseDouble(txtOrderTotal.getText()),
+                    cmbCustomerCodes.getValue(),items));
+            if (isOrderSaved){
                 boolean allQtyUpdated = manageQty(items);
                 if (allQtyUpdated) {
                     conn.commit();
@@ -316,9 +309,7 @@ public class PlaceOrderFormController {
 
     private void generateOrderId() {
         try {
-            String sql = "SELECT orderId FROM `Order` ORDER BY orderId DESC LIMIT 1";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = new OrderDaoImpl().setId();
             if (set.next()){
                 String id = set.getString(1);
                 //String dataArray[] = id.split("a-z"); // a001 b001
@@ -326,9 +317,9 @@ public class PlaceOrderFormController {
                 id=dataArray[1];
                 int oldNumber= Integer.parseInt(id);
                 oldNumber++;
-                if (oldNumber<9){
+                if (oldNumber<=9){
                     txtOrderId.setText("B00"+oldNumber);
-                }else if(oldNumber<99){
+                }else if(oldNumber<=99){
                     txtOrderId.setText("B0"+oldNumber);
                 }else{
                     txtOrderId.setText("B"+oldNumber);
@@ -343,19 +334,12 @@ public class PlaceOrderFormController {
     }
 
     private boolean manageQty(ArrayList<CartItem> items){
-
             try {
                 for (CartItem i:items
                 ) {
-                    String sql = "INSERT INTO `Order Details` VALUES (?,?,?,?)";
-                    PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-                    statement.setString(1, i.getCode());
-                    statement.setString(2, txtOrderId.getText());
-                    statement.setDouble(3, i.getUnitPrice());
-                    statement.setInt(4, i.getQty());
-
-                    boolean orderDetailsSaved = statement.executeUpdate() > 0;
+                    boolean orderDetailsSaved = new CartItemImpl().save(i,txtOrderId.getText());
                     if (orderDetailsSaved) {
+                        System.out.println("done");
                         boolean qtyUpdated = qtyUpdate(i);
                         if (!qtyUpdated) {
                             return false;
@@ -372,11 +356,7 @@ public class PlaceOrderFormController {
 
     private boolean qtyUpdate(CartItem i){
         try {
-            String sql = "UPDATE Product SET qtyOnHand = (qtyOnHand - ?) WHERE code = ?";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            statement.setInt(1,i.getQty());
-            statement.setString(2,i.getCode());
-            return statement.executeUpdate()>0;
+           return new CartItemImpl().update(i);
         }catch (ClassNotFoundException | SQLException e){
             e.printStackTrace();
             return false;

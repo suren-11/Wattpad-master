@@ -1,5 +1,7 @@
 package com.seekerscloud.pos.controller;
 
+import com.seekerscloud.pos.dao.custom.OrderDao;
+import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
 import com.seekerscloud.pos.model.Order;
@@ -71,9 +73,7 @@ public class OrdersFormController {
 
     private void loadData() {
         try {
-            String sql = "SELECT * FROM `Order`";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = new OrderDaoImpl().loadData();
             ObservableList<OrderDetailsTM> tmList = FXCollections.observableArrayList();
 
             while (set.next()){
@@ -90,10 +90,7 @@ public class OrdersFormController {
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get() == ButtonType.YES) {
                         try {
-                            String sql1 = "DELETE FROM `Order` WHERE orderId = ?";
-                            PreparedStatement statement1 = DBConnection.getInstance().getConnection().prepareStatement(sql1);
-                            statement1.setString(1,tm.getOrderId());
-                            if (statement1.executeUpdate()>0){
+                            if (new OrderDaoImpl().delete(tm.getOrderId())){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Order Deleted!").show();
                                 loadData();
                             }else {

@@ -1,6 +1,7 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXTextField;
+import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
 import com.seekerscloud.pos.model.CartItem;
@@ -50,20 +51,12 @@ public class OrderDetailsFormController {
                 removeUi();
                 return;
             }
-
-            String sql1 = "SELECT customer,date FROM `order` WHERE  orderId = ?";
-            PreparedStatement statement1 = DBConnection.getInstance().getConnection().prepareStatement(sql1);
-            statement1.setString(1,orderId);
-            ResultSet set1 = statement1.executeQuery();
-
+            ResultSet set1 = new OrderDaoImpl().loadOrderData(orderId);
             if (set1.next()){
                 String customerId = set1.getString(1);
                 String date = set1.getString(2);
 
-                String sql2 = "SELECT * FROM Customer WHERE id = ?";
-                PreparedStatement statement2 = DBConnection.getInstance().getConnection().prepareStatement(sql2);
-                statement2.setString(1, customerId);
-                ResultSet set2 = statement2.executeQuery();
+                ResultSet set2 = new OrderDaoImpl().selectedCustomer(customerId);
                 if (set2.next()){
                     txtId.setText(customerId);
                     txtName.setText(set2.getString(2));
@@ -73,17 +66,11 @@ public class OrderDetailsFormController {
                     txtOrderId.setText(orderId);
                     txtDate.setText(date);
 
-                    String sql3 = "SELECT totalCost FROM `Order` WHERE orderId= ?";
-                    PreparedStatement statement4 = DBConnection.getInstance().getConnection().prepareStatement(sql3);
-                    statement4.setString(1,orderId);
-                    ResultSet set4 = statement4.executeQuery();
+                    ResultSet set4 = new OrderDaoImpl().selectedTotal(orderId);
 
                     if (set4.next()){
                         double totalCost = set4.getDouble(1);
-                        String sql = "SELECT o.orderId, d.itemCode, d.orderId, d.unitPrice, d.qty FROM `Order` o INNER JOIN `Order Details` d ON o.orderId = d.orderId AND o.orderId = ?";
-                        PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-                        statement.setString(1, orderId);
-                        ResultSet set = statement.executeQuery();
+                        ResultSet set = new OrderDaoImpl().detailLoad(orderId);
                         ObservableList<ItemDetailsTM> tmList = FXCollections.observableArrayList();
 
                         while (set.next()) {

@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class Order {
     private String orderId;
-    private Date placedDate;
+    private String placedDate;
     private double total;
     private String customer;
     private ArrayList<CartItem> items;
@@ -13,7 +13,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(String orderId, Date placedDate, double total, String customer, ArrayList<CartItem> items) {
+    public Order(String orderId, String placedDate, double total, String customer, ArrayList<CartItem> items) {
         this.orderId = orderId;
         this.placedDate = placedDate;
         this.total = total;
@@ -29,11 +29,11 @@ public class Order {
         this.orderId = orderId;
     }
 
-    public Date getPlacedDate() {
+    public String getPlacedDate() {
         return placedDate;
     }
 
-    public void setPlacedDate(Date placedDate) {
+    public void setPlacedDate(String placedDate) {
         this.placedDate = placedDate;
     }
 

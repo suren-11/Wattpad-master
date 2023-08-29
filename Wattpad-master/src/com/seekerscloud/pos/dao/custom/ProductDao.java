@@ -11,4 +11,5 @@ public interface ProductDao extends CrudDao<Product, String> {
     public ArrayList<Product> setData(String text) throws SQLException, ClassNotFoundException;
 
     public ResultSet setId() throws SQLException, ClassNotFoundException;
+    public ResultSet loadCodes() throws SQLException, ClassNotFoundException;
 }

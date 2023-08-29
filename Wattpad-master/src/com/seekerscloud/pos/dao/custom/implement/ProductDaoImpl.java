@@ -42,4 +42,9 @@ public class ProductDaoImpl implements ProductDao {
     public ResultSet setId() throws SQLException, ClassNotFoundException {
         return CrudUtil.execute("SELECT * FROM Product ORDER BY code DESC");
     }
+
+    @Override
+    public ResultSet loadCodes() throws SQLException, ClassNotFoundException {
+        return CrudUtil.execute("SELECT code FROM Product");
+    }
 }

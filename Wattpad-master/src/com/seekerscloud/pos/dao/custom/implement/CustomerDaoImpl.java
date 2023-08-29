@@ -44,4 +44,9 @@ public class CustomerDaoImpl implements CustomerDao {
     public ResultSet setId() throws SQLException, ClassNotFoundException {
         return CrudUtil.execute("SELECT * FROM Customer ORDER BY id DESC");
     }
+
+    @Override
+    public ResultSet loadID() throws SQLException, ClassNotFoundException {
+        return CrudUtil.execute("SELECT id FROM Customer");
+    }
 }

@@ -56,9 +56,7 @@ public class CustomerFormController {
                     if (null!=newValue){
                         setCustomerData(newValue);
                     }
-
         });
-
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
             searchText=newValue;
             setTableData(searchText);
@@ -74,7 +72,6 @@ public class CustomerFormController {
         txtSalary.setText(String.valueOf(tm.getSalary()));
 
         btnSaveUpdate.setText("Update Customer");
-
     }
 
     public void backToHomeOnAction(ActionEvent actionEvent) throws IOException {

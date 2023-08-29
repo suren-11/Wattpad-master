@@ -10,4 +10,5 @@ import java.util.ArrayList;
 public interface CustomerDao extends CrudDao<Customer,String> {
     public ArrayList<Customer> setData(String text) throws SQLException, ClassNotFoundException;
     public ResultSet setId() throws SQLException, ClassNotFoundException;
+    public ResultSet loadID() throws SQLException, ClassNotFoundException;
 }
