@@ -1,6 +1,9 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXTextField;
+import com.seekerscloud.pos.dao.DaoFactory;
+import com.seekerscloud.pos.dao.DaoTypes;
+import com.seekerscloud.pos.dao.custom.OrderDao;
 import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
@@ -36,6 +39,7 @@ public class OrderDetailsFormController {
     public TableColumn colQty;
     public TableColumn colTotal;
     public AnchorPane context;
+    private OrderDao orderDao = DaoFactory.getInstance().getDto(DaoTypes.Order);
 
     public void initialize(){
         colProductCode.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -50,11 +54,11 @@ public class OrderDetailsFormController {
                 removeUi();
                 return;
             }
-            ResultSet set1 = new OrderDaoImpl().loadOrderData(orderId);
+            ResultSet set1 = orderDao.loadOrderData(orderId);
             if (set1.next()){
                 String customerId = set1.getString(1);
                 String date = set1.getString(2);
-                ResultSet set2 = new OrderDaoImpl().selectedCustomer(customerId);
+                ResultSet set2 = orderDao.selectedCustomer(customerId);
                 if (set2.next()){
                     txtId.setText(customerId);
                     txtName.setText(set2.getString(2));
@@ -64,10 +68,10 @@ public class OrderDetailsFormController {
                     txtOrderId.setText(orderId);
                     txtDate.setText(date);
 
-                    ResultSet set4 = new OrderDaoImpl().selectedTotal(orderId);
+                    ResultSet set4 = orderDao.selectedTotal(orderId);
                     if (set4.next()){
                         double totalCost = set4.getDouble(1);
-                        ResultSet set = new OrderDaoImpl().detailLoad(orderId);
+                        ResultSet set = orderDao.detailLoad(orderId);
                         ObservableList<ItemDetailsTM> tmList = FXCollections.observableArrayList();
 
                         while (set.next()) {

@@ -1,6 +1,12 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.DaoFactory;
+import com.seekerscloud.pos.dao.DaoTypes;
+import com.seekerscloud.pos.dao.custom.CartItemDao;
+import com.seekerscloud.pos.dao.custom.CustomerDao;
+import com.seekerscloud.pos.dao.custom.OrderDao;
+import com.seekerscloud.pos.dao.custom.ProductDao;
 import com.seekerscloud.pos.dao.custom.implement.CartItemImpl;
 import com.seekerscloud.pos.dao.custom.implement.CustomerDaoImpl;
 import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
@@ -55,6 +61,10 @@ public class PlaceOrderFormController {
     public TableColumn colQty;
     public TableColumn colTotal;
     public TableColumn colOption;
+    private OrderDao orderDao = DaoFactory.getInstance().getDto(DaoTypes.Order);
+    private CustomerDao customerDao = DaoFactory.getInstance().getDto(DaoTypes.Customer);
+    private ProductDao productDao = DaoFactory.getInstance().getDto(DaoTypes.Product);
+    private CartItemDao cartItemDao = DaoFactory.getInstance().getDto(DaoTypes.CartItem);
     public JFXButton addToCartButton;
 
     public void initialize() {
@@ -93,10 +103,7 @@ public class PlaceOrderFormController {
     private void setProductData(String code) {
         try {
             txtQty.requestFocus();
-            String sql = "SELECT * FROM Product WHERE code = ?";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            statement.setString(1,code);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = orderDao.selectedProducts(code);
             if (set.next()){
                 txtDescription.setText(set.getString(2));
                 txtUnitPrice.setText(String.valueOf(set.getDouble(3)));
@@ -110,10 +117,7 @@ public class PlaceOrderFormController {
     private void setCustomerData(String id) {
         try {
             txtQty.requestFocus();
-            String sql = "SELECT * FROM Customer WHERE id = ?";
-            PreparedStatement statement = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            statement.setString(1,id);
-            ResultSet set = statement.executeQuery();
+            ResultSet set = orderDao.selectedCustomer(id);
             if (set.next()){
                 txtName.setText(set.getString(2));
                 txtAddress.setText(set.getString(3));
@@ -126,7 +130,7 @@ public class PlaceOrderFormController {
 
     private void loadCustomerIds() {
         try {
-            ResultSet set = new CustomerDaoImpl().loadID();
+            ResultSet set = customerDao.loadID();
             ArrayList<String> idList = new ArrayList<>();
             while (set.next()) {
                 idList.add(set.getString(1));
@@ -140,7 +144,7 @@ public class PlaceOrderFormController {
 
     private void loadItemCodes() {
         try {
-            ResultSet set = new ProductDaoImpl().loadCodes();
+            ResultSet set = productDao.loadCodes();
             ArrayList<String> codeList = new ArrayList<>();
             while (set.next()){
                 codeList.add(set.getString(1));
@@ -268,7 +272,7 @@ public class PlaceOrderFormController {
         try {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
-            boolean isOrderSaved = new OrderDaoImpl().save(new Order(txtOrderId.getText(),new SimpleDateFormat("dd-MM-yyyy").format(new Date()),
+            boolean isOrderSaved = orderDao.save(new Order(txtOrderId.getText(),new SimpleDateFormat("dd-MM-yyyy").format(new Date()),
                     Double.parseDouble(txtOrderTotal.getText()),
                     cmbCustomerCodes.getValue(),items));
             if (isOrderSaved){
@@ -309,7 +313,7 @@ public class PlaceOrderFormController {
 
     private void generateOrderId() {
         try {
-            ResultSet set = new OrderDaoImpl().setId();
+            ResultSet set = orderDao.setId();
             if (set.next()){
                 String id = set.getString(1);
                 //String dataArray[] = id.split("a-z"); // a001 b001
@@ -337,7 +341,7 @@ public class PlaceOrderFormController {
             try {
                 for (CartItem i:items
                 ) {
-                    boolean orderDetailsSaved = new CartItemImpl().save(i,txtOrderId.getText());
+                    boolean orderDetailsSaved = cartItemDao.save(i,txtOrderId.getText());
                     if (orderDetailsSaved) {
                         System.out.println("done");
                         boolean qtyUpdated = qtyUpdate(i);
@@ -356,7 +360,7 @@ public class PlaceOrderFormController {
 
     private boolean qtyUpdate(CartItem i){
         try {
-           return new CartItemImpl().update(i);
+           return cartItemDao.update(i);
         }catch (ClassNotFoundException | SQLException e){
             e.printStackTrace();
             return false;

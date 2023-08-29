@@ -1,6 +1,9 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.DaoFactory;
+import com.seekerscloud.pos.dao.DaoTypes;
+import com.seekerscloud.pos.dao.custom.CustomerDao;
 import com.seekerscloud.pos.dao.custom.implement.CustomerDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.db.Database;
@@ -35,6 +38,7 @@ public class CustomerFormController {
     public TableColumn colOption;
     public JFXButton btnSaveUpdate;
     public TextField txtSearch;
+    private CustomerDao customerDao = DaoFactory.getInstance().getDto(DaoTypes.Customer);
     private String searchText="";
 
     public void initialize(){
@@ -90,7 +94,7 @@ public class CustomerFormController {
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Customer")){
             //save
             try{
-                boolean isCustomerSaved = new CustomerDaoImpl().save(new Customer(
+                boolean isCustomerSaved = customerDao.save(new Customer(
                         txtId.getText(),
                         txtName.getText(),
                         txtAddress.getText(),
@@ -110,7 +114,7 @@ public class CustomerFormController {
 
         }else{
             try {
-                boolean isCustomerUpdated = new CustomerDaoImpl().update(new Customer(
+                boolean isCustomerUpdated = customerDao.update(new Customer(
                         txtId.getText(),
                         txtName.getText(),
                         txtAddress.getText(),
@@ -145,7 +149,7 @@ public class CustomerFormController {
         try {
 
             ObservableList<CustomerTM> obList= FXCollections.observableArrayList();
-            ArrayList<Customer> customers = new CustomerDaoImpl().setData(text);
+            ArrayList<Customer> customers = customerDao.setData(text);
             for (Customer c : customers){
                 Button btn= new Button("Delete");
                 CustomerTM tm = new CustomerTM(
@@ -162,7 +166,7 @@ public class CustomerFormController {
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
                         try {
-                           if (new CustomerDaoImpl().delete(tm.getId())){
+                           if (customerDao.delete(tm.getId())){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Customer Deleted!").show();
                                 setCustomerId();
                                 setTableData(searchText);
@@ -193,7 +197,7 @@ public class CustomerFormController {
         // concat the character again to the incremented number (C-002)
         // set CustomerId
         try{
-            ResultSet set = new CustomerDaoImpl().setId();
+            ResultSet set = customerDao.setId();
 
             if (set.next()){
 //                txtId.setText("C-001");

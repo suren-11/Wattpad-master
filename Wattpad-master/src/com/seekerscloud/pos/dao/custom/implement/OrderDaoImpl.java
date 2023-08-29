@@ -47,6 +47,11 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
+    public ResultSet selectedProducts(String id) throws SQLException, ClassNotFoundException {
+        return CrudUtil.execute("SELECT * FROM Product WHERE code = ?",id);
+    }
+
+    @Override
     public ResultSet selectedTotal(String id) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute("SELECT totalCost FROM `Order` WHERE orderId= ?",id);
     }

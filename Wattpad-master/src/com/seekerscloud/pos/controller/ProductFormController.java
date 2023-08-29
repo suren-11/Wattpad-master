@@ -1,6 +1,9 @@
 package com.seekerscloud.pos.controller;
 
 import com.jfoenix.controls.JFXButton;
+import com.seekerscloud.pos.dao.DaoFactory;
+import com.seekerscloud.pos.dao.DaoTypes;
+import com.seekerscloud.pos.dao.custom.ProductDao;
 import com.seekerscloud.pos.dao.custom.implement.ProductDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
 import com.seekerscloud.pos.entity.Product;
@@ -34,6 +37,7 @@ public class ProductFormController {
     public TableColumn colProductUnitPrice;
     public TableColumn colQtyOnHand;
     public TableColumn colOption;
+    private ProductDao productDao = DaoFactory.getInstance().getDto(DaoTypes.Product);
     private String searchText="";
     public void initialize(){
         setTableData(searchText);
@@ -79,7 +83,7 @@ public class ProductFormController {
         text = "%"+text.toLowerCase()+"%"; // String Pool==> Strings are immutable
         try {
             ObservableList<ProductTM> obList= FXCollections.observableArrayList();
-            ArrayList<Product> productsList = new ProductDaoImpl().setData(text);
+            ArrayList<Product> productsList = productDao.setData(text);
             for (Product p : productsList){
                 Button btn= new Button("Delete");
                 ProductTM tm = new ProductTM(p.getCode(),p.getDescription(),p.getUnitPrice(),p.getQtyOnHand(),btn);
@@ -90,7 +94,7 @@ public class ProductFormController {
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get()==ButtonType.YES){
                         try {
-                            if (new ProductDaoImpl().delete(tm.getCode())){
+                            if (productDao.delete(tm.getCode())){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Product Deleted!").show();
                                 setTableData(searchText);
                                 setItemCode();
@@ -132,7 +136,7 @@ public class ProductFormController {
 
     private void setItemCode(){
         try{
-            ResultSet set = new ProductDaoImpl().setId();
+            ResultSet set = productDao.setId();
             if (set.next()){
 //                txtCode.setText("I-001");
                 String code = set.getString(1);
@@ -159,7 +163,7 @@ public class ProductFormController {
         if (btnSaveUpdate.getText().equalsIgnoreCase("Save Product")){
             //save
             try{
-                boolean isProductSaved = new ProductDaoImpl().save(new Product(
+                boolean isProductSaved = productDao.save(new Product(
                         txtCode.getText(),txtDescription.getText(),Double.parseDouble(txtUnitPrice.getText()),Integer.parseInt(txtQtyOnHand.getText())
                 ));
                 if (isProductSaved){
@@ -175,7 +179,7 @@ public class ProductFormController {
             }
         }else{
             try {
-                boolean isProductUpdated = new ProductDaoImpl().update(new Product(
+                boolean isProductUpdated = productDao.update(new Product(
                         txtCode.getText(),txtDescription.getText(),Double.parseDouble(txtUnitPrice.getText()),
                         Integer.parseInt(txtQtyOnHand.getText())
                 ));

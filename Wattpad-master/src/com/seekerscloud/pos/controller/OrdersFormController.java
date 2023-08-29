@@ -1,5 +1,7 @@
 package com.seekerscloud.pos.controller;
 
+import com.seekerscloud.pos.dao.DaoFactory;
+import com.seekerscloud.pos.dao.DaoTypes;
 import com.seekerscloud.pos.dao.custom.OrderDao;
 import com.seekerscloud.pos.dao.custom.implement.OrderDaoImpl;
 import com.seekerscloud.pos.db.DBConnection;
@@ -32,6 +34,7 @@ public class OrdersFormController {
     public TableColumn colTotal;
     public TableColumn colCustomerId;
     public TableColumn colOption;
+    private OrderDao orderDao = DaoFactory.getInstance().getDto(DaoTypes.Order);
     public void initialize(){
         colOrderId.setCellValueFactory(new PropertyValueFactory<>("orderId"));
         colOrderDate.setCellValueFactory(new PropertyValueFactory<>("date"));
@@ -73,7 +76,7 @@ public class OrdersFormController {
 
     private void loadData() {
         try {
-            ResultSet set = new OrderDaoImpl().loadData();
+            ResultSet set = orderDao.loadData();
             ObservableList<OrderDetailsTM> tmList = FXCollections.observableArrayList();
 
             while (set.next()){
@@ -90,7 +93,7 @@ public class OrdersFormController {
                     Optional<ButtonType> val = alert.showAndWait();
                     if (val.get() == ButtonType.YES) {
                         try {
-                            if (new OrderDaoImpl().delete(tm.getOrderId())){
+                            if (orderDao.delete(tm.getOrderId())){
                                 new Alert(Alert.AlertType.CONFIRMATION, "Order Deleted!").show();
                                 loadData();
                             }else {
